@@ -1,22 +1,27 @@
 <!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="color-scheme" content="light dark">
-<title>台灣農曆日期小工具</title>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>日曆｜台灣農曆</title>
 <style>
-:root{font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;color-scheme:light dark}*{box-sizing:border-box}body{margin:0;padding:8px;background:transparent}.widget{background:light-dark(#fafaf9,#222);color:light-dark(#242424,#f5f5f5);border:1px solid light-dark(#e5e5e5,#444);border-radius:18px;padding:20px;max-width:640px;min-height:164px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:light-dark(#777,#bbb)}h1{font-size:clamp(19px,4vw,25px);font-weight:700;letter-spacing:-.03em;margin:9px 0 5px}.sub{font-size:14px;color:light-dark(#666,#ccc)}.date{min-width:80px;text-align:center;padding:10px 12px;background:light-dark(#fff,#333);border:1px solid light-dark(#eee,#444);border-radius:13px}.date .dayname{font-size:11px;color:light-dark(#777,#bbb);font-weight:700}.date .num{font-size:34px;font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums}.foot{display:flex;justify-content:space-between;gap:10px;border-top:1px solid light-dark(#e7e7e7,#444);margin-top:18px;padding-top:12px;font-size:11px;color:light-dark(#777,#bbb)}@media(max-width:350px){.widget{padding:14px}.date{min-width:65px;padding:8px}.date .num{font-size:28px}.foot{flex-wrap:wrap}}
+:root{color-scheme:light;font-family:Arial,'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}*{box-sizing:border-box}html,body{margin:0;width:100%;min-height:100%;background:transparent}body{padding:5px}.sheet{position:relative;width:100%;max-width:420px;margin:0 auto;min-height:360px;background:#fff;border:1px solid #e9e7e4;border-radius:13px;padding:22px 18px 20px;text-align:center;overflow:hidden;color:#252525}.sheet:before{content:'';position:absolute;left:18px;right:18px;top:12px;border-top:3px dotted #e9e4e0}.year{font-size:19px;font-weight:800;letter-spacing:.14em;margin-top:13px}.month{font-size:clamp(17px,7vw,26px);font-weight:800;letter-spacing:.11em;margin-top:4px;color:#e56e67}.day{font-family:Arial,Helvetica,sans-serif;font-size:clamp(104px,45vw,176px);font-weight:900;letter-spacing:-.09em;line-height:1.03;margin:9px 10px 3px 0;font-variant-numeric:tabular-nums}.weekday{display:inline-block;padding:7px 24px;border-radius:40px;background:#e56e67;color:#fff;font-size:clamp(17px,6vw,23px);font-weight:800;letter-spacing:.12em}.lunar{margin-top:19px;font-size:clamp(14px,4.7vw,18px);font-weight:650;letter-spacing:.07em}.festival{min-height:25px;margin-top:8px;font-size:14px;font-weight:650;color:#d66d65}.festival:empty{visibility:hidden}.tz{margin-top:16px;font-size:10px;letter-spacing:.08em;color:#a5a5a5}@media(min-width:360px){.sheet{padding:24px 24px 20px;min-height:415px}.day{margin-top:12px}}@media(prefers-reduced-motion:no-preference){.sheet{transition:background .2s}}
 </style>
 </head>
-<body><main class="widget" aria-live="polite"><div class="top"><div><div class="eyebrow">TODAY · TAIPEI</div><h1 id="date">讀取日期中…</h1><div class="sub" id="lunar"></div></div><div class="date"><div class="dayname" id="weekdayEn">—</div><div class="num" id="day">—</div></div></div><div class="foot"><span id="year">農曆</span><span>台灣時間 · UTC+08:00</span></div></main>
+<body><main class="sheet" aria-label="台灣每日農曆日曆"><div class="year" id="year">2026</div><div class="month" id="month">NOVEMBER</div><div class="day" id="day">03</div><div class="weekday" id="weekday">TUESDAY</div><div class="lunar" id="lunar">農曆九月廿五</div><div class="festival" id="festival"></div><div class="tz">TAIPEI · UTC+08:00</div></main>
 <script>
 'use strict';
-const zone='Asia/Taipei';
-const greg=new Intl.DateTimeFormat('zh-TW',{timeZone:zone,year:'numeric',month:'numeric',day:'numeric',weekday:'long',calendar:'gregory'});
-const lunar=new Intl.DateTimeFormat('zh-TW-u-ca-chinese',{timeZone:zone,month:'long',day:'numeric',year:'numeric'});
-const english=new Intl.DateTimeFormat('en-US',{timeZone:zone,weekday:'short'});
-const digits=new Intl.DateTimeFormat('en-US',{timeZone:zone,day:'2-digit'});
-const extract=(fmt,date)=>Object.fromEntries(fmt.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
-function update(){const now=new Date(),g=extract(greg,now),l=extract(lunar,now);const y=Number(g.year),m=Number(g.month),d=Number(g.day);document.getElementById('date').textContent=`${y}年${m}月${d}日`;const month=l.month||'';const day=l.day||'';document.getElementById('lunar').textContent=`${g.weekday} · 農曆${month}${day}`;document.getElementById('weekdayEn').textContent=english.format(now).toUpperCase();document.getElementById('day').textContent=digits.format(now);document.getElementById('year').textContent=`農曆 · ${l.relatedYear||l.yearName||''}${l.yearName?'年':''}`;}
-update();setInterval(update,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
+const ZONE='Asia/Taipei';
+const greg=new Intl.DateTimeFormat('en-US',{timeZone:ZONE,year:'numeric',month:'numeric',day:'numeric',weekday:'long'});
+const lun=new Intl.DateTimeFormat('zh-TW-u-ca-chinese',{timeZone:ZONE,month:'long',day:'numeric'});
+const months=['JANUARY','FEBRUARY','MARCH','APRIL','MAY','JUNE','JULY','AUGUST','SEPTEMBER','OCTOBER','NOVEMBER','DECEMBER'];
+const fixed={'1-1':'元旦','2-14':'情人節','2-28':'和平紀念日','4-4':'兒童節','5-1':'勞動節','10-10':'國慶日','10-31':'萬聖節','12-25':'聖誕節'};
+const lunarFest={'1-1':'春節','1-15':'元宵節','5-5':'端午節','7-7':'七夕','7-15':'中元節','8-15':'中秋節','9-9':'重陽節','12-8':'臘八節'};
+const terms=['小寒','大寒','立春','雨水','驚蟄','春分','清明','穀雨','立夏','小滿','芒種','夏至','小暑','大暑','立秋','處暑','白露','秋分','寒露','霜降','立冬','小雪','大雪','冬至'];
+// Solar longitude from standard low-order solar ephemeris, sufficient for identifying dates near term boundaries.
+function sunLongitude(ms){let jd=ms/86400000+2440587.5,T=(jd-2451545)/36525;let L=(280.46646+36000.76983*T+.0003032*T*T)%360;let M=(357.52911+35999.05029*T-.0001537*T*T)*Math.PI/180;let C=(1.914602-.004817*T-.000014*T*T)*Math.sin(M)+(.019993-.000101*T)*Math.sin(2*M)+.000289*Math.sin(3*M);let omega=(125.04-1934.136*T)*Math.PI/180;return (L+C-.00569-.00478*Math.sin(omega)+360)%360}
+function solarTerm(y,m,d){let start=Date.UTC(y,m-1,d-1,16),end=start+86400000;let a=Math.floor(((sunLongitude(start)-285+360)%360)/15),b=Math.floor(((sunLongitude(end)-285+360)%360)/15);if(a!==b)return terms[b];return ''}
+function parts(fmt,dt){return Object.fromEntries(fmt.formatToParts(dt).filter(x=>x.type!=='literal').map(x=>[x.type,x.value]))}
+function cnDay(n){if(n===10)return '初十';if(n===20)return '二十';if(n===30)return '三十';let digits=['','一','二','三','四','五','六','七','八','九'];return (n<10?'初':n<20?'十':'廿')+digits[n%10]}
+function update(){const now=new Date(),g=parts(greg,now),l=parts(lun,now);let y=+g.year,m=+g.month,d=+g.day;let lm=l.month||'',ld=+l.day;document.getElementById('year').textContent=y;document.getElementById('month').textContent=months[m-1];document.getElementById('day').textContent=String(d).padStart(2,'0');document.getElementById('weekday').textContent=g.weekday.toUpperCase();document.getElementById('lunar').textContent='農曆'+lm+(Number.isFinite(ld)?cnDay(ld):l.day||'');let lunarMonth=({'正月':1,'二月':2,'三月':3,'四月':4,'五月':5,'六月':6,'七月':7,'八月':8,'九月':9,'十月':10,'冬月':11,'臘月':12,'十一月':11,'十二月':12})[lm];let labels=[];let term=solarTerm(y,m,d);if(term)labels.push(term);if(fixed[m+'-'+d])labels.push(fixed[m+'-'+d]);if(lunarMonth&& !lm.includes('閏')&&lunarFest[lunarMonth+'-'+ld])labels.push(lunarFest[lunarMonth+'-'+ld]);document.getElementById('festival').textContent=labels.join(' · ')}
+update();setInterval(update,30000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
 </script></body></html>

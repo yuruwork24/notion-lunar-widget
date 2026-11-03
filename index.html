@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>台灣農曆日期小工具</title>
+<style>
+:root{font-family:system-ui,-apple-system,'Noto Sans TC',sans-serif;color-scheme:light dark}*{box-sizing:border-box}body{margin:0;padding:8px;background:transparent}.widget{background:light-dark(#fafaf9,#222);color:light-dark(#242424,#f5f5f5);border:1px solid light-dark(#e5e5e5,#444);border-radius:18px;padding:20px;max-width:640px;min-height:164px}.top{display:flex;align-items:center;justify-content:space-between;gap:12px}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.12em;color:light-dark(#777,#bbb)}h1{font-size:clamp(19px,4vw,25px);font-weight:700;letter-spacing:-.03em;margin:9px 0 5px}.sub{font-size:14px;color:light-dark(#666,#ccc)}.date{min-width:80px;text-align:center;padding:10px 12px;background:light-dark(#fff,#333);border:1px solid light-dark(#eee,#444);border-radius:13px}.date .dayname{font-size:11px;color:light-dark(#777,#bbb);font-weight:700}.date .num{font-size:34px;font-weight:750;line-height:1.2;font-variant-numeric:tabular-nums}.foot{display:flex;justify-content:space-between;gap:10px;border-top:1px solid light-dark(#e7e7e7,#444);margin-top:18px;padding-top:12px;font-size:11px;color:light-dark(#777,#bbb)}@media(max-width:350px){.widget{padding:14px}.date{min-width:65px;padding:8px}.date .num{font-size:28px}.foot{flex-wrap:wrap}}
+</style>
+</head>
+<body><main class="widget" aria-live="polite"><div class="top"><div><div class="eyebrow">TODAY · TAIPEI</div><h1 id="date">讀取日期中…</h1><div class="sub" id="lunar"></div></div><div class="date"><div class="dayname" id="weekdayEn">—</div><div class="num" id="day">—</div></div></div><div class="foot"><span id="year">農曆</span><span>台灣時間 · UTC+08:00</span></div></main>
+<script>
+'use strict';
+const zone='Asia/Taipei';
+const greg=new Intl.DateTimeFormat('zh-TW',{timeZone:zone,year:'numeric',month:'numeric',day:'numeric',weekday:'long',calendar:'gregory'});
+const lunar=new Intl.DateTimeFormat('zh-TW-u-ca-chinese',{timeZone:zone,month:'long',day:'numeric',year:'numeric'});
+const english=new Intl.DateTimeFormat('en-US',{timeZone:zone,weekday:'short'});
+const digits=new Intl.DateTimeFormat('en-US',{timeZone:zone,day:'2-digit'});
+const extract=(fmt,date)=>Object.fromEntries(fmt.formatToParts(date).filter(p=>p.type!=='literal').map(p=>[p.type,p.value]));
+function update(){const now=new Date(),g=extract(greg,now),l=extract(lunar,now);const y=Number(g.year),m=Number(g.month),d=Number(g.day);document.getElementById('date').textContent=`${y}年${m}月${d}日`;const month=l.month||'';const day=l.day||'';document.getElementById('lunar').textContent=`${g.weekday} · 農曆${month}${day}`;document.getElementById('weekdayEn').textContent=english.format(now).toUpperCase();document.getElementById('day').textContent=digits.format(now);document.getElementById('year').textContent=`農曆 · ${l.relatedYear||l.yearName||''}${l.yearName?'年':''}`;}
+update();setInterval(update,15000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)update()});
+</script></body></html>
